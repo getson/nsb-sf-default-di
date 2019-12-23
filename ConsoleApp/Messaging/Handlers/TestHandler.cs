@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace ConsoleApp.Messaging.Handlers
 {
-    public class TestHandlers : IHandleMessages<TestMessage>
+    public class TestHandler : IHandleMessages<TestMessage>
     {
         private readonly ITestDateProvider _testDateProvider;
 
-        public TestHandlers(ITestDateProvider testDateProvider)
+        public TestHandler(ITestDateProvider testDateProvider)
         {
             _testDateProvider = testDateProvider;
         }

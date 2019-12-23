@@ -46,7 +46,7 @@ namespace WebApi
                                   IEndpointInstance endpointInstance = null;
                                   var endpointConfiguration = new EndpointConfiguration("WebApi");
                                   endpointConfiguration.UseTransport<LearningTransport>()
-                                                       .StorageDirectory($"{AppContext.BaseDirectory}\\.learningtransport");
+                                                       .StorageDirectory($"E:\\SfDevCluster\\.learningtransport");
                                   endpointConfiguration.UseContainer<ServicesBuilder>(c => c.ExistingServices(services));
 
 

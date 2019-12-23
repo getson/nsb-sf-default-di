@@ -4,13 +4,13 @@ using System;
 using System.Threading.Tasks;
 using WebApi.Providers;
 
-namespace ConsoleApp.Messaging.Handlers
+namespace WebApi.Messaging.Handlers
 {
-    public class TestHandlers : IHandleMessages<TestMessage>
+    public class TestHandler : IHandleMessages<TestMessage>
     {
         private readonly IGenerateIdentityProvider _identityProvider;
 
-        public TestHandlers(IGenerateIdentityProvider identityProvider)
+        public TestHandler(IGenerateIdentityProvider identityProvider)
         {
             _identityProvider = identityProvider;
         }

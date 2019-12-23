@@ -47,7 +47,7 @@ namespace ConsoleApp
 
             var endpointConfiguration = new EndpointConfiguration(_endpointName);
             endpointConfiguration.UseTransport<LearningTransport>()
-                                 .StorageDirectory($"{AppContext.BaseDirectory}\\.learningtransport");
+                                 .StorageDirectory($"E:\\SfDevCluster\\.learningtransport");
 
             endpointConfiguration.UseContainer<ServicesBuilder>(c => c.ExistingServices(services));
 

@@ -12,12 +12,12 @@ namespace ConsoleApp
         /// <summary>
         /// This is the entry point of the service host process.
         /// </summary>
-        private static async Task Main()
+        private static void Main()
         {
             try
             {
-                await ServiceRuntime.RegisterServiceAsync("ConsoleAppType",
-                     context => new ConsoleApp(context));
+                ServiceRuntime.RegisterServiceAsync("ConsoleAppType",
+                    context => new ConsoleApp(context)).GetAwaiter().GetResult();
 
                 ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(ConsoleApp).Name);
 

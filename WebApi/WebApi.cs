@@ -12,6 +12,7 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 using Microsoft.ServiceFabric.Data;
 using NServiceBus;
+using WebApi.Providers;
 
 namespace WebApi
 {
@@ -30,30 +31,37 @@ namespace WebApi
         /// <returns>The collection of listeners.</returns>
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
-            var endpointConfiguration = new EndpointConfiguration("WebApi");
-            endpointConfiguration.UseTransport<LearningTransport>()
-                                 .StorageDirectory(@"E:\SfDevCluster\.learningtransport");
+            var kestrelListener = new ServiceInstanceListener(serviceContext =>
+              new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
+              {
+                  ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
 
+                  return new WebHostBuilder()
+                              .UseKestrel()
+                              .ConfigureServices(services =>
+                              {
+                                  services.AddSingleton(serviceContext);
+                                  services.AddSingleton<IGenerateIdentityProvider, GenerateIdentityProvider>();
+
+                                  IEndpointInstance endpointInstance = null;
+                                  var endpointConfiguration = new EndpointConfiguration("WebApi");
+                                  endpointConfiguration.UseTransport<LearningTransport>()
+                                                       .StorageDirectory($"{AppContext.BaseDirectory}\\.learningtransport");
+                                  endpointConfiguration.UseContainer<ServicesBuilder>(c => c.ExistingServices(services));
+
+
+                                  services.AddSingleton<IMessageSession>(x => endpointInstance);
+                                  endpointInstance = Endpoint.Start(endpointConfiguration).GetAwaiter().GetResult();
+                              })
+                              .UseContentRoot(Directory.GetCurrentDirectory())
+                              .UseStartup<Startup>()
+                              .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
+                              .UseUrls(url)
+                              .Build();
+              }));
             return new ServiceInstanceListener[]
             {
-                new ServiceInstanceListener(serviceContext =>
-                    new KestrelCommunicationListener(serviceContext, "ServiceEndpoint", (url, listener) =>
-                    {
-                        ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
-
-                        return new WebHostBuilder()
-                                    .UseKestrel()
-                                    .ConfigureServices(
-                                        services => services
-                                            .AddSingleton(serviceContext)
-                                            .AddSingleton<IMessageSession>(x=>Endpoint.Start(endpointConfiguration).GetAwaiter().GetResult())
-                                            )
-                                    .UseContentRoot(Directory.GetCurrentDirectory())
-                                    .UseStartup<Startup>()
-                                    .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.None)
-                                    .UseUrls(url)
-                                    .Build();
-                    }))
+                kestrelListener
             };
         }
     }

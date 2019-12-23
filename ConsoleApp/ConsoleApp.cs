@@ -36,7 +36,7 @@ namespace ConsoleApp
                 new ServiceInstanceListener(context
                         => new NServiceBusListener(context,
                                     _endpointName,
-                                    serviceProvider.GetRequiredService<IStartableEndpoint>())
+                                    serviceProvider.GetRequiredService<IEndpointInstance>())
                         )
             };
         }
@@ -44,15 +44,18 @@ namespace ConsoleApp
         {
             services.AddSingleton<ITestDateProvider, TestDateProvider>();
 
+
             var endpointConfiguration = new EndpointConfiguration(_endpointName);
             endpointConfiguration.UseTransport<LearningTransport>()
-                                 .StorageDirectory(@"E:\SfDevCluster\.learningtransport");
+                                 .StorageDirectory($"{AppContext.BaseDirectory}\\.learningtransport");
 
             endpointConfiguration.UseContainer<ServicesBuilder>(c => c.ExistingServices(services));
-            services.AddSingleton(e => Endpoint.Create(endpointConfiguration)
+
+
+            var endpointInstance = Endpoint.Start(endpointConfiguration)
                                                .GetAwaiter()
-                                               .GetResult()
-                                  );
+                                               .GetResult();
+            services.AddSingleton(endpointInstance);
 
             return services.BuildServiceProvider();
         }
